@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+
+  db:
+    image: postgres:15
+    container_name: payu_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: payu_db
+      POSTGRES_DB: payu
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./PayU_Auth_Service
+    container_name: payu_backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DB_USER: postgres
+      DB_PASSWORD: payu_db
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: payu
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./PayU-Frontend
+    container_name: payu_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  postgres_data:
